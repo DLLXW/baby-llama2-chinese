@@ -36,7 +36,7 @@ python data_process.py
 #预训练
 python pretrain.py
 #SFT
-python train_sft.py
+python sft.py
 ```
 根据自己算力的情况合理的调节以下参数，控制模型的计算量和参数量
 - max_seq_len = 512

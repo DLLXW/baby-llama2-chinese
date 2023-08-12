@@ -126,7 +126,7 @@ def init_model():
         n_layers=n_layers,
         n_heads=n_heads,
         n_kv_heads=n_heads,
-        vocab_size=65535,#64793,
+        vocab_size=64793,#64793,
         multiple_of=multiple_of,
         max_seq_len=max_seq_len,
         dropout=dropout,
@@ -252,14 +252,6 @@ if __name__=="__main__":
     )
     #
     best_val_loss = 1e9
-    # attempt to derive vocab_size from the dataset
-    meta_path = os.path.join('./meta.pkl')
-    meta_vocab_size = None
-    if os.path.exists(meta_path):
-        with open(meta_path, 'rb') as f:
-            meta = pickle.load(f)
-        meta_vocab_size = meta['vocab_size']
-        print(f"found vocab_size = {meta_vocab_size} (inside {meta_path})")
     #-----init dataloader------
     df_sft=pd.read_csv('./data/sft_data.csv')
     input=[]
