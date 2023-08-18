@@ -1,5 +1,5 @@
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import time
 import math
 import pickle
@@ -163,7 +163,7 @@ def init_model():
 # I/O
 if __name__=="__main__":
     out_dir = 'out'
-    max_epoch = 5
+    max_epoch = 2
     eval_interval = 1
     log_interval = 50
     eval_iters = 200
@@ -174,23 +174,23 @@ if __name__=="__main__":
     gradient_accumulation_steps = 1 # used to simulate larger batch sizes
     batch_size = 32 # if gradient_accumulation_steps > 1, this is the micro-batch size
     # model
-    max_seq_len = 256
-    dim = 512
-    n_layers = 8
+    max_seq_len = 512
+    dim = 1024
+    n_layers = 12
     n_heads = 8
     multiple_of = 32
     dropout = 0.0 # for pretraining 0 is good, for finetuning try 0.1+
     bias = False # do we use bias inside LayerNorm and Linear layers?
     # adamw optimizer
-    learning_rate = 3e-4 # max learning rate
-    weight_decay = 1e-1
+    learning_rate = 2e-5 # max learning rate
+    weight_decay = 1e-4
     beta1 = 0.9
     beta2 = 0.95
     grad_clip = 1.0 # clip gradients at this value, or disable if == 0.0
     # learning rate decay settings
     decay_lr = True # whether to decay the learning rate
-    warmup_iters = 500 # how many steps to warm up for
-    lr_decay_iters = 5000 # should be ~= max_iters per Chinchilla
+    warmup_iters = 1000 # how many steps to warm up for
+    lr_decay_iters = 50000 # should be ~= max_iters per Chinchilla
     min_lr = 1e-6 # minimum learning rate, should be ~= learning_rate/10 per Chinchilla
     # DDP settings
     backend = 'nccl' # 'nccl', 'gloo', etc.
@@ -208,7 +208,7 @@ if __name__=="__main__":
     # config = {k: globals()[k] for k in config_keys}  # will be useful for logging
     # -----------------------------------------------------------------------------
 
-    save_dir =os.path.join(out_dir , '20230808_sft')
+    save_dir =os.path.join(out_dir , 'sft_bell')
     if not os.path.exists(save_dir): os.makedirs(save_dir)
     logger = get_logger(os.path.join(save_dir,'log.log'))
     # various inits, derived attributes, I/O setup
@@ -252,24 +252,25 @@ if __name__=="__main__":
     )
     #
     best_val_loss = 1e9
+    
     #-----init dataloader------
-    df_sft=pd.read_csv('./data/sft_data.csv')
-    input=[]
-    target=[]
-    with open('../track1/train_valid.json','r') as f:
-        data=json.load(f)
-    #
-    for l in data:
-        input.append(l['question'])
-        target.append(l['answer'])
-    df = pd.DataFrame()
-    df['prompt']=input
-    df['answer']=target
-    df=pd.concat((df_sft,df)).reset_index(drop=True)
-    #df.dropna()
+    df=pd.read_csv('./data/sft_data.csv')
+    # input=[]
+    # target=[]
+    # with open('../track1/train_valid.json','r') as f:
+    #     data=json.load(f)
+    # #
+    # for l in data:
+    #     input.append(l['question'])
+    #     target.append(l['answer'])
+    # df = pd.DataFrame()
+    # df['prompt']=input
+    # df['answer']=target
+    # df=pd.concat((df_sft,df[100:])).reset_index(drop=True)
+    df=df.sample(frac=1.0)
     print(df)
     tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
-    train_ds = SFTDataset(df,tokenizer, max_length=256)
+    train_ds = SFTDataset(df,tokenizer, max_length=512)
     train_loader = torch.utils.data.DataLoader(
         train_ds,
         batch_size=batch_size,
@@ -289,7 +290,7 @@ if __name__=="__main__":
     # )
     #init model
     model=init_model()
-    model.load_state_dict(torch.load('./out/20230808_warmup/epoch_2.pth'))
+    model.load_state_dict(torch.load('./out/baike_pretrain/epoch_0.pth'))
     model.to(device)
     # initialize a GradScaler. If enabled=False scaler is a no-op
     scaler = torch.cuda.amp.GradScaler(enabled=(dtype == 'float16'))

@@ -1,5 +1,5 @@
 import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 import time
 import math
 import pickle
@@ -13,6 +13,8 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from dataset import PretrainDataset
 import logging
 
+#To run with DDP on 4 gpus on 1 node, example:
+# torchrun --standalone --nproc_per_node=4 pretrain.py OR python -m torch.distributed.launch --nproc_per_node=4 pretrain.py
         
 def get_logger(filename, verbosity=1, name=None):
     level_dict = {0: logging.DEBUG, 1: logging.INFO, 2: logging.WARNING}
@@ -157,7 +159,7 @@ def init_model():
 # I/O
 if __name__=="__main__":
     out_dir = 'out'
-    max_epoch = 3
+    max_epoch = 2
     eval_interval = 1
     log_interval = 100
     eval_iters = 200
@@ -166,11 +168,11 @@ if __name__=="__main__":
     init_from = 'scratch' # 'scratch' or 'resume' or 'gpt2*'
     #
     gradient_accumulation_steps = 1 # used to simulate larger batch sizes
-    batch_size = 64 # if gradient_accumulation_steps > 1, this is the micro-batch size
-    # model
-    max_seq_len = 256
-    dim = 512
-    n_layers = 8
+    batch_size = 32  # if gradient_accumulation_steps > 1, this is the micro-batch size
+    # model 根据需要更改 
+    max_seq_len = 512
+    dim = 1024
+    n_layers = 12
     n_heads = 8
     multiple_of = 32
     dropout = 0.0 # for pretraining 0 is good, for finetuning try 0.1+
@@ -183,9 +185,9 @@ if __name__=="__main__":
     grad_clip = 1.0 # clip gradients at this value, or disable if == 0.0
     # learning rate decay settings
     decay_lr = True # whether to decay the learning rate
-    warmup_iters = 2000 # how many steps to warm up for
-    lr_decay_iters = 50000 # should be ~= max_iters per Chinchilla
-    min_lr = 1e-6 # minimum learning rate, should be ~= learning_rate/10 per Chinchilla
+    warmup_iters = 1000 # how many steps to warm up for
+    lr_decay_iters = 80000 # should be ~= max_iters per Chinchilla
+    min_lr = 1e-5 # minimum learning rate, should be ~= learning_rate/10 per Chinchilla
     # DDP settings
     backend = 'nccl' # 'nccl', 'gloo', etc.
     # system
@@ -202,12 +204,13 @@ if __name__=="__main__":
     # config = {k: globals()[k] for k in config_keys}  # will be useful for logging
     # -----------------------------------------------------------------------------
 
-    save_dir =os.path.join(out_dir , '20230808_warmup')
+    save_dir =os.path.join(out_dir , '20230815_baike_pretrain')
     if not os.path.exists(save_dir): os.makedirs(save_dir)
     logger = get_logger(os.path.join(save_dir,'log.log'))
     # various inits, derived attributes, I/O setup
    # various inits, derived attributes, I/O setup
     ddp = int(os.environ.get("RANK", -1)) != -1  # is this a ddp run?
+    
     if ddp:
         init_process_group(backend="nccl")
         ddp_rank = int(os.environ["RANK"])
@@ -246,21 +249,26 @@ if __name__=="__main__":
     )
     #
     best_val_loss = 1e9
+    #
     #-----init dataloader------
     data_path_list=[
-        './data/wiki.bin',
-        './data/medical_book.bin',
-        './data/medical_encyclopedia.bin',
-        './data/medical_qa.bin'
+        './data/pretrain_data.bin'
+        #'./data/baidubaike_563w.bin',
+        #'./data/medical_book.bin',
+        # './data/medical_encyclopedia.bin',
+        # './data/medical_qa.bin',
+        # './data/wiki.bin'
     ]
-    train_ds = PretrainDataset(data_path_list, max_length=256)
+    train_ds = PretrainDataset(data_path_list, max_length=max_seq_len,memmap=True)
+    train_sampler = torch.utils.data.distributed.DistributedSampler(train_ds)
     train_loader = torch.utils.data.DataLoader(
         train_ds,
         batch_size=batch_size,
         pin_memory=False,
         drop_last=False,
         shuffle=False,        
-        num_workers=0,
+        num_workers=4,
+        sampler=train_sampler
     )
     # val_ds = PretrainDataset(data_path_list, max_length=256)
     # val_loader = torch.utils.data.DataLoader(
@@ -301,6 +309,8 @@ if __name__=="__main__":
     for epoch in range(max_epoch):
         train_epoch(epoch)
         #val_loss=valid_epoch(epoch)
-        torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
+        if torch.distributed.get_rank() == 0:  #一般用0，当然，可以选任意的rank保存。
+            #
+            torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
     if ddp:
         destroy_process_group()
