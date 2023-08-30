@@ -40,21 +40,4 @@ class PretrainDataset(Dataset):
         return torch.from_numpy(X),torch.from_numpy(Y)
 #
 if __name__=="__main__":
-    data_path_lst=[
-        './data/diagnosis/train.csv'
-        ]
-    
-    train_ds = PretrainDataset(data_path_lst, max_length=256)
-    train_loader = torch.utils.data.DataLoader(
-        train_ds,
-        batch_size=2,
-        pin_memory=False,
-        drop_last=False,
-        shuffle=False,        
-        num_workers=0,
-    )
-    for i, (X, Y) in enumerate(train_loader):
-        print(X.shape,Y.shape)
-        print(X[0])
-        print(Y[0])
-        break
+    pass
