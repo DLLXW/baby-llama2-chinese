@@ -37,8 +37,10 @@ def process_medical(data_path,name):
         f.write(arr.tobytes()) 
 
 def sft_to_pretrain():
-    df=pd.read_csv('./data/medical_qa_144w.csv')
     doc_ids=[]
+
+    '''
+    df=pd.read_csv('./data/medical_qa_144w.csv')
     for _,q,a in tqdm(df.itertuples()):
         q_id = tokenizer.encode(q,add_special_tokens=False)
         a_id = tokenizer.encode(a,add_special_tokens=False)
@@ -49,6 +51,70 @@ def sft_to_pretrain():
         text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
         if len(text_id)>5:
             doc_ids+=text_id
+    '''
+
+    with open('./data/train_en_1.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+    with open('./data/test_en_1.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+    with open('./data/valid_en_1.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+
+    with open('./data/train_zh_0.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['instruction']+line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+    with open('./data/test_zh_0.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['instruction']+line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+    with open('./data/valid_zh_0.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['instruction']+line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+
     arr = np.array(doc_ids,dtype=np.uint16)
     print(arr.shape)
     with open('./data/medical_qa.bin','wb') as f:
@@ -147,7 +213,8 @@ if __name__=="__main__":
         './data/baidubaike_563w.bin',
         './data/medical_book.bin',
         './data/medical_encyclopedia.bin',
-        './data/wiki.bin'
+        './data/wiki.bin',
+        './data/medical_qa.bin'
     ]
     data_lst=[]
     for data_path in data_path_list:
