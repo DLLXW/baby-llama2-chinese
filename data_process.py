@@ -6,7 +6,7 @@ from chatglm_tokenizer.tokenization_chatglm import ChatGLMTokenizer
 import pandas as pd
 #from zhconv import convert
 def process_wiki_clean():
-    with open('./data/wikipedia-cn-20230720-filtered.json','r') as f:
+    with open('./data/wikipedia-cn-20230720-filtered.json','r',encoding='utf-8') as f:
         data=json.load(f)
     doc_ids=[]
     for line in tqdm(data):
@@ -20,7 +20,7 @@ def process_wiki_clean():
         f.write(arr.tobytes())
 
 def process_medical(data_path,name):
-    f=open(data_path,'r')
+    f=open(data_path,'r',encoding='utf-8')
     doc_ids=[]
     while True:
         line=f.readline()
@@ -37,8 +37,10 @@ def process_medical(data_path,name):
         f.write(arr.tobytes()) 
 
 def sft_to_pretrain():
-    df=pd.read_csv('./data/medical_qa_144w.csv')
     doc_ids=[]
+
+    '''
+    df=pd.read_csv('./data/medical_qa_144w.csv')
     for _,q,a in tqdm(df.itertuples()):
         q_id = tokenizer.encode(q,add_special_tokens=False)
         a_id = tokenizer.encode(a,add_special_tokens=False)
@@ -49,13 +51,77 @@ def sft_to_pretrain():
         text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
         if len(text_id)>5:
             doc_ids+=text_id
+    '''
+
+    with open('./data/train_en_1.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+    with open('./data/test_en_1.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+    with open('./data/valid_en_1.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+
+    with open('./data/train_zh_0.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['instruction']+line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+    with open('./data/test_zh_0.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['instruction']+line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+    with open('./data/valid_zh_0.json','r',encoding='utf-8') as f:
+        for row in f:
+            line=json.loads(row)
+            q=line['instruction']+line['input']
+            a=line['output']
+            q_id=tokenizer.encode(q,add_special_tokens=False)
+            a_id=tokenizer.encode(a,add_special_tokens=False)
+            text_id=q_id+a_id+[tokenizer.special_tokens['<eos>']]
+            if len(text_id)>5:
+                doc_ids+=text_id
+
     arr = np.array(doc_ids,dtype=np.uint16)
     print(arr.shape)
     with open('./data/medical_qa.bin','wb') as f:
         f.write(arr.tobytes())
 
 def sft_process():
-    with open('./data/alpaca_gpt4_data_zh.json','r') as f:
+    with open('./data/alpaca_gpt4_data_zh.json','r',encoding='utf-8') as f:
         data=json.load(f)
     #
     q_lst=[]
@@ -79,7 +145,7 @@ def sft_process():
     #     q_lst.append(l['question'])
     #     a_lst.append(l['answer'])
     #
-    f = open('./data/Belle_open_source_1M.json','r')
+    f = open('./data/Belle_open_source_1M.json','r',encoding='utf-8')
     
     #s
     while True:
@@ -104,12 +170,17 @@ def sft_process():
     print(df)
 
 def process_baidu():
-    f=open('./data/563w_baidubaike.json','r')
+    BATCH_SIZE = 1000000
+
     cnt=0
+    batch_cnt=0
     token=0
     doc_ids=[]
+
+    f1=open('./data/563w_baidubaike.json','r',encoding='utf-8')
+    
     while True:
-        line = f.readline()
+        line = f1.readline()
         if not line:
             break
         line=json.loads(line)
@@ -125,15 +196,23 @@ def process_baidu():
         if len(text_id)>5:
             doc_ids+=text_id
         cnt+=1
-        if cnt%10000==0:
-            print(cnt)
-        
-    arr = np.array(doc_ids,dtype=np.uint16)
-    print(arr.shape)
-    with open('./data/baidubaike_563w.bin','wb') as f:
-        f.write(arr.tobytes())
-            
-            
+        if cnt%BATCH_SIZE==0:
+            batch_cnt+=1
+            arr = np.array(doc_ids,dtype=np.uint16)
+            doc_ids=[]
+            print('cnt:',cnt,'arr_shape:',arr.shape)
+            with open('./data/baidubaike_563w_{}.bin'.format(batch_cnt),'wb') as f2:
+                f2.write(arr.tobytes())
+            del arr
+
+    if not doc_ids:
+        batch_cnt+=1
+        arr = np.array(doc_ids,dtype=np.uint16)
+        print('cnt:',cnt,'arr_shape:',arr.shape)
+        with open('./data/baidubaike_563w_{}.bin'.format(batch_cnt),'wb') as f:
+            f.write(arr.tobytes())
+    
+
     
 if __name__=="__main__":
     tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
@@ -144,10 +223,15 @@ if __name__=="__main__":
     # sft_process()
     #process_baidu()
     data_path_list=[
-        './data/baidubaike_563w.bin',
+        './data/baidubaike_563w_1.bin',
+        './data/baidubaike_563w_2.bin',
+        './data/baidubaike_563w_3.bin',
+        './data/baidubaike_563w_4.bin',
+        './data/baidubaike_563w_5.bin',
         './data/medical_book.bin',
         './data/medical_encyclopedia.bin',
-        './data/wiki.bin'
+        './data/wiki.bin',
+        './data/medical_qa.bin'
     ]
     data_lst=[]
     for data_path in data_path_list:
