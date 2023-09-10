@@ -6,7 +6,7 @@ from chatglm_tokenizer.tokenization_chatglm import ChatGLMTokenizer
 import pandas as pd
 #from zhconv import convert
 def process_wiki_clean():
-    with open('./data/wikipedia-cn-20230720-filtered.json','r') as f:
+    with open('./data/wikipedia-cn-20230720-filtered.json','r',encoding='utf-8') as f:
         data=json.load(f)
     doc_ids=[]
     for line in tqdm(data):
@@ -20,7 +20,7 @@ def process_wiki_clean():
         f.write(arr.tobytes())
 
 def process_medical(data_path,name):
-    f=open(data_path,'r')
+    f=open(data_path,'r',encoding='utf-8')
     doc_ids=[]
     while True:
         line=f.readline()
@@ -55,7 +55,7 @@ def sft_to_pretrain():
         f.write(arr.tobytes())
 
 def sft_process():
-    with open('./data/alpaca_gpt4_data_zh.json','r') as f:
+    with open('./data/alpaca_gpt4_data_zh.json','r',encoding='utf-8') as f:
         data=json.load(f)
     #
     q_lst=[]
@@ -79,7 +79,7 @@ def sft_process():
     #     q_lst.append(l['question'])
     #     a_lst.append(l['answer'])
     #
-    f = open('./data/Belle_open_source_1M.json','r')
+    f = open('./data/Belle_open_source_1M.json','r',encoding='utf-8')
     
     #s
     while True:
@@ -104,7 +104,7 @@ def sft_process():
     print(df)
 
 def process_baidu():
-    f=open('./data/563w_baidubaike.json','r')
+    f=open('./data/563w_baidubaike.json','r',encoding='utf-8')
     cnt=0
     token=0
     doc_ids=[]
