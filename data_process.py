@@ -170,12 +170,17 @@ def sft_process():
     print(df)
 
 def process_baidu():
-    f=open('./data/563w_baidubaike.json','r',encoding='utf-8')
+    BATCH_SIZE = 1000000
+
     cnt=0
+    batch_cnt=0
     token=0
     doc_ids=[]
+
+    f1=open('./data/563w_baidubaike.json','r',encoding='utf-8')
+    
     while True:
-        line = f.readline()
+        line = f1.readline()
         if not line:
             break
         line=json.loads(line)
@@ -191,15 +196,23 @@ def process_baidu():
         if len(text_id)>5:
             doc_ids+=text_id
         cnt+=1
-        if cnt%10000==0:
-            print(cnt)
-        
-    arr = np.array(doc_ids,dtype=np.uint16)
-    print(arr.shape)
-    with open('./data/baidubaike_563w.bin','wb') as f:
-        f.write(arr.tobytes())
-            
-            
+        if cnt%BATCH_SIZE==0:
+            batch_cnt+=1
+            arr = np.array(doc_ids,dtype=np.uint16)
+            doc_ids=[]
+            print('cnt:',cnt,'arr_shape:',arr.shape)
+            with open('./data/baidubaike_563w_{}.bin'.format(batch_cnt),'wb') as f2:
+                f2.write(arr.tobytes())
+            del arr
+
+    if not doc_ids:
+        batch_cnt+=1
+        arr = np.array(doc_ids,dtype=np.uint16)
+        print('cnt:',cnt,'arr_shape:',arr.shape)
+        with open('./data/baidubaike_563w_{}.bin'.format(batch_cnt),'wb') as f:
+            f.write(arr.tobytes())
+    
+
     
 if __name__=="__main__":
     tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
@@ -210,7 +223,11 @@ if __name__=="__main__":
     # sft_process()
     #process_baidu()
     data_path_list=[
-        './data/baidubaike_563w.bin',
+        './data/baidubaike_563w_1.bin',
+        './data/baidubaike_563w_2.bin',
+        './data/baidubaike_563w_3.bin',
+        './data/baidubaike_563w_4.bin',
+        './data/baidubaike_563w_5.bin',
         './data/medical_book.bin',
         './data/medical_encyclopedia.bin',
         './data/wiki.bin',
