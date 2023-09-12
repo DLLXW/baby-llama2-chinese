@@ -37,6 +37,7 @@ python data_process.py
 
 ```python
 #预训练
+因为用到了torch的分布式训练，我们需要在运行的时候设置环境变量。使用python -m torch.distributed.launch --use_env pretrain.py，或直接使用torchrun替代python命令。
 python pretrain.py
 #SFT
 python sft.py
