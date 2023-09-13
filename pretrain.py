@@ -212,7 +212,13 @@ if __name__=="__main__":
     ddp = int(os.environ.get("RANK", -1)) != -1  # is this a ddp run?
     
     if ddp:
-        init_process_group(backend="nccl")
+        # Check if the operating system is Windows
+        if os.name == 'nt':
+            # Diff between backends: https://pytorch.org/docs/stable/distributed.html
+            init_process_group(backend="gloo")
+        else:
+            # If the operating system is Linux based, os.name == 'posix'
+            init_process_group(backend="nccl")
         ddp_rank = int(os.environ["RANK"])
         ddp_local_rank = int(os.environ["LOCAL_RANK"])
         ddp_world_size = int(os.environ["WORLD_SIZE"])
@@ -267,7 +273,7 @@ if __name__=="__main__":
         pin_memory=False,
         drop_last=False,
         shuffle=False,        
-        num_workers=4,
+        num_workers=0 if os.name == 'nt' else 4,
         sampler=train_sampler
     )
     # val_ds = PretrainDataset(data_path_list, max_length=256)
