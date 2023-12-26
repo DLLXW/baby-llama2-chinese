@@ -81,7 +81,7 @@ target_lst=[]
 for p in data[:100]:
     # run generation
     prompt=p['question']
-    x=tokenizer.encode(prompt,add_special_tokens=False)+[tokenizer.special_tokens['<eos>']]
+    x=tokenizer.encode(prompt,add_special_tokens=False)+[tokenizer.special_tokens['<bos>']]
     x = (torch.tensor(x, dtype=torch.long, device=device)[None, ...])
     target=p['answer']
     target_lst.append(target)
