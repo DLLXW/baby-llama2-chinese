@@ -1,5 +1,7 @@
 ## baby-llama2-chinese
-用于从头预训练+SFT一个小参数量的中文LLaMa2的仓库；24G单卡即可运行得到一个流畅中文问答的chat-llama2.
+用于从头预训练+SFT一个小参数量的中文LLaMa2的仓库。
+
+[qq交流群](716455397)
 
 >20230818更新，因为第一版（50M参数）的版本，当时很多评测样例其实出现在了SFT数据中，所以让我误以为模型具备很流畅的问答能力，但是后面发现效果并没有那么好。后面使用了更多的数据和更大的模型，效果逐步提升。所以大家如果有充足的算力和时间，可以逐步尝试加大模型，将参数量扩到百M以上，其实消费级显卡也是完全可以接受的。
 
@@ -18,7 +20,7 @@
 因为在llama官方所提供的词表中，中文的部分只有700个，这也是llama中文能力聊胜于无的原因。为了训练自己的中文LLaMa，这里将引入新的中文分词器。为了方便，这里选择采用ChatGLM2的分词器，词表大小64793，这是一个很妙的数字，因为它刚好在uint16的表示范围（0～65535的无符号整数），每一个token只需要两个字节即可表示，当我们的语料较大时候，相比常用的int32可以节省一半的存储空间。
 
 ## 预训练语料预处理
-```python
+```shell
 #脚本里面每一个函数对应一个语料库的预处理，搭建新加语料可以自行扩展。
 python data_process.py
 #运行结束后，会在./data目录下产生.bin文件
@@ -36,9 +38,13 @@ python data_process.py
 ## 预训练+SFT
 因为用到了torch的分布式训练，我们需要在运行的时候设置环境变量。使用python -m torch.distributed.launch --use_env pretrain.py，或直接使用torchrun替代python命令。
 
-```python
+```shell
 #预训练
 python pretrain.py
+#
+# 单机多卡可以如下命令
+torchrun --standalone --nproc_per_node=4 pretrain.py OR python -m torch.distributed.launch --nproc_per_node=4 pretrain.py
+
 #SFT
 python sft.py
 ```
