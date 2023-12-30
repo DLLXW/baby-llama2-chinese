@@ -65,20 +65,21 @@ def train_epoch(epoch):
         with ctx:
             logits = model(X, Y)
             loss = raw_model.last_loss
-            #loss = loss / gradient_accumulation_steps
+            loss = loss / gradient_accumulation_steps
         # immediately async prefetch next batch while model is doing the forward pass on the GPU
         # backward pass, with gradient scaling if training in fp16
         scaler.scale(loss).backward()
         #
-        # clip the gradient
-        if grad_clip != 0.0:
-            scaler.unscale_(optimizer)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
-        # step the optimizer and scaler if training in fp16
-        scaler.step(optimizer)
-        scaler.update()
-        # flush the gradients as soon as we can, no need for this memory anymore
-        optimizer.zero_grad(set_to_none=True)
+        if (step + 1) % gradient_accumulation_steps == 0:
+            # clip the gradient
+            if grad_clip != 0.0:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
+            # step the optimizer and scaler if training in fp16
+            scaler.step(optimizer)
+            scaler.update()
+            # flush the gradients as soon as we can, no need for this memory anymore
+            optimizer.zero_grad(set_to_none=True)
         #打印日志
         if step % log_interval == 0:
             spend_time=time.time()-start_time
@@ -91,6 +92,16 @@ def train_epoch(epoch):
                         loss.item(), 
                         optimizer.param_groups[-1]['lr'],
                         spend_time / (step+1) * iter_per_epoch // 60 - spend_time // 60))
+        #
+        if step % save_interval == 0:
+            if ddp and torch.distributed.get_rank() == 0:
+                model.eval()
+                torch.save(model.module.state_dict(),'{}/iter_{}.pth'.format(save_dir,int(step+epoch*iter_per_epoch)))
+                model.train()
+            else:
+                model.eval()
+                torch.save(model.state_dict(),'{}/iter_{}.pth'.format(save_dir,int(step+epoch*iter_per_epoch)))
+                model.train()
 
 @torch.no_grad()
 def valid_epoch(epoch):
@@ -162,6 +173,7 @@ if __name__=="__main__":
     max_epoch = 2
     eval_interval = 1
     log_interval = 100
+    save_interval = 10000
     eval_iters = 200
     eval_only = False # if True, script exits right after the first eval
     always_save_checkpoint = True # if True, always save a checkpoint after each eval
@@ -292,11 +304,6 @@ if __name__=="__main__":
     scaler = torch.cuda.amp.GradScaler(enabled=(dtype == 'float16'))
     # optimizer
     optimizer = model.configure_optimizers(weight_decay, learning_rate, (beta1, beta2), device_type)
-    #
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=max_epoch, T_mult=1, eta_min=1e-6, last_epoch=-1)
-    iter_per_epoch=len(train_loader)
-    warmup_epoch=1
-    
     # compile the model
     if compile:
         print("compiling the model... (takes a ~minute)")
@@ -312,11 +319,13 @@ if __name__=="__main__":
         #
     raw_model = model.module if ddp else model # unwrap DDP container if needed
     # training loop
+    iter_per_epoch=len(train_loader)
     for epoch in range(max_epoch):
         train_epoch(epoch)
         #val_loss=valid_epoch(epoch)
-        if torch.distributed.get_rank() == 0:  #一般用0，当然，可以选任意的rank保存。
-            #
+        if ddp and torch.distributed.get_rank() == 0:  #一般用0，当然，可以选任意的rank保存。
+            torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
+        else:
             torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
     if ddp:
         destroy_process_group()

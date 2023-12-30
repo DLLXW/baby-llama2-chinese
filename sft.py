@@ -45,7 +45,7 @@ def get_lr(it):
     assert 0 <= decay_ratio <= 1
     coeff = 0.5 * (1.0 + math.cos(math.pi * decay_ratio)) # coeff ranges 0..1
     return min_lr + coeff * (learning_rate - min_lr)
-
+#------------------------------------------------------------------------------
 def train_epoch(epoch):
     start_time=time.time()
     for step, (X, Y,loss_mask) in enumerate(train_loader):
@@ -95,7 +95,7 @@ def train_epoch(epoch):
                         loss.item(), 
                         optimizer.param_groups[-1]['lr'],
                         spend_time / (step+1) * iter_per_epoch // 60 - spend_time // 60))
-
+#------------------
 @torch.no_grad()
 def valid_epoch(epoch):
     global best_val_loss
@@ -297,10 +297,7 @@ if __name__=="__main__":
     # optimizer
     optimizer = model.configure_optimizers(weight_decay, learning_rate, (beta1, beta2), device_type)
     #
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=max_epoch, T_mult=1, eta_min=1e-6, last_epoch=-1)
     iter_per_epoch=len(train_loader)
-    warmup_epoch=1
-    
     # compile the model
     if compile:
         print("compiling the model... (takes a ~minute)")
@@ -313,12 +310,15 @@ if __name__=="__main__":
         prefix = "_orig_mod." if compile else ""
         model._ddp_params_and_buffers_to_ignore = {prefix + "freqs_cis"}
         model = DDP(model, device_ids=[ddp_local_rank])
-        #
+    #
     raw_model = model.module if ddp else model # unwrap DDP container if needed
     # training loop
     for epoch in range(max_epoch):
         train_epoch(epoch)
         #val_loss=valid_epoch(epoch)
-        torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
+        if ddp and torch.distributed.get_rank() == 0:
+            torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
+        else:
+            torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
     if ddp:
         destroy_process_group()
