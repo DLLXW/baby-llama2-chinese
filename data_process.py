@@ -20,6 +20,7 @@ def process_wiki_clean():
         f.write(arr.tobytes())
 
 def process_medical(data_path,name):
+    print("正在处理 medical 文件")
     f=open(data_path,'r',encoding='utf-8')
     doc_ids=[]
     while True:
@@ -54,7 +55,7 @@ def sft_to_pretrain():
     '''
 
     with open('./data/train_en_1.json','r',encoding='utf-8') as f:
-        for row in f:
+        for row in tqdm(f):
             line=json.loads(row)
             q=line['input']
             a=line['output']
@@ -64,7 +65,7 @@ def sft_to_pretrain():
             if len(text_id)>5:
                 doc_ids+=text_id
     with open('./data/test_en_1.json','r',encoding='utf-8') as f:
-        for row in f:
+        for row in tqdm(f):
             line=json.loads(row)
             q=line['input']
             a=line['output']
@@ -74,7 +75,7 @@ def sft_to_pretrain():
             if len(text_id)>5:
                 doc_ids+=text_id
     with open('./data/valid_en_1.json','r',encoding='utf-8') as f:
-        for row in f:
+        for row in tqdm(f):
             line=json.loads(row)
             q=line['input']
             a=line['output']
@@ -85,7 +86,7 @@ def sft_to_pretrain():
                 doc_ids+=text_id
 
     with open('./data/train_zh_0.json','r',encoding='utf-8') as f:
-        for row in f:
+        for row in tqdm(f):
             line=json.loads(row)
             q=line['instruction']+line['input']
             a=line['output']
@@ -95,7 +96,7 @@ def sft_to_pretrain():
             if len(text_id)>5:
                 doc_ids+=text_id
     with open('./data/test_zh_0.json','r',encoding='utf-8') as f:
-        for row in f:
+        for row in tqdm(f):
             line=json.loads(row)
             q=line['instruction']+line['input']
             a=line['output']
@@ -105,7 +106,7 @@ def sft_to_pretrain():
             if len(text_id)>5:
                 doc_ids+=text_id
     with open('./data/valid_zh_0.json','r',encoding='utf-8') as f:
-        for row in f:
+        for row in tqdm(f):
             line=json.loads(row)
             q=line['instruction']+line['input']
             a=line['output']
@@ -126,7 +127,7 @@ def sft_process():
     #
     q_lst=[]
     a_lst=[]
-    for per in data:
+    for per in tqdm(data):
         q=per['instruction']
         i=per['input']
         a=per['output']
@@ -146,6 +147,7 @@ def sft_process():
     #     a_lst.append(l['answer'])
     #
     f = open('./data/Belle_open_source_1M.json','r',encoding='utf-8')
+    print("正在处理 Belle_open_source_1M 文件")
     
     #s
     while True:
@@ -178,6 +180,7 @@ def process_baidu():
     doc_ids=[]
 
     f1=open('./data/563w_baidubaike.json','r',encoding='utf-8')
+    print("正在处理 563w_baidubaike 文件")
     
     while True:
         line = f1.readline()
@@ -216,12 +219,12 @@ def process_baidu():
     
 if __name__=="__main__":
     tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
-    # process_wiki_clean()
-    # process_medical('./data/medical_book_zh.json','book')
-    # process_medical('./data/train_encyclopedia.json','encyclopedia')
-    # sft_to_pretrain()
-    # sft_process()
-    #process_baidu()
+    process_wiki_clean()
+    process_medical('./data/medical_book_zh.json','book')
+    process_medical('./data/train_encyclopedia.json','encyclopedia')
+    sft_to_pretrain()
+    sft_process()
+    process_baidu()
     data_path_list=[
         './data/baidubaike_563w_1.bin',
         './data/baidubaike_563w_2.bin',
