@@ -94,10 +94,11 @@ def train_epoch(epoch):
                         spend_time / (step+1) * iter_per_epoch // 60 - spend_time // 60))
         #
         if step % save_interval == 0:
-            if ddp and torch.distributed.get_rank() == 0:
-                model.eval()
-                torch.save(model.module.state_dict(),'{}/iter_{}.pth'.format(save_dir,int(step+epoch*iter_per_epoch)))
-                model.train()
+            if ddp:
+                if torch.distributed.get_rank() == 0:
+                    model.eval()
+                    torch.save(model.module.state_dict(),'{}/iter_{}.pth'.format(save_dir,int(step+epoch*iter_per_epoch)))
+                    model.train()
             else:
                 model.eval()
                 torch.save(model.state_dict(),'{}/iter_{}.pth'.format(save_dir,int(step+epoch*iter_per_epoch)))
@@ -323,8 +324,9 @@ if __name__=="__main__":
     for epoch in range(max_epoch):
         train_epoch(epoch)
         #val_loss=valid_epoch(epoch)
-        if ddp and torch.distributed.get_rank() == 0:  #一般用0，当然，可以选任意的rank保存。
-            torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
+        if ddp:
+            if torch.distributed.get_rank() == 0:  #一般用0，当然，可以选任意的rank保存。
+                torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
         else:
             torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
     if ddp:
