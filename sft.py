@@ -316,8 +316,9 @@ if __name__=="__main__":
     for epoch in range(max_epoch):
         train_epoch(epoch)
         #val_loss=valid_epoch(epoch)
-        if ddp and torch.distributed.get_rank() == 0:
-            torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
+        if ddp:
+            if torch.distributed.get_rank() == 0:
+                torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
         else:
             torch.save(raw_model.state_dict(),'{}/epoch_{}.pth'.format(save_dir,epoch))
     if ddp:
