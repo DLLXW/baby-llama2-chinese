@@ -104,27 +104,27 @@ def train_epoch(epoch):
                 torch.save(model.state_dict(),'{}/iter_{}.pth'.format(save_dir,int(step+epoch*iter_per_epoch)))
                 model.train()
 
-@torch.no_grad()
-def valid_epoch(epoch):
-    global best_val_loss
-    losses = []
-    model.eval()
-    for _, (X, Y) in enumerate(val_loader):
-        X=X.to(device)
-        Y=Y.to(device)
-        with ctx:
-            logits, loss = model(X, Y)
-        losses.append(loss.item())
-    model.train()
-    val_loss=np.mean(losses)
-    #
-    logger.info('valid loss = {:.4f}'.format(val_loss))
-    if val_loss < best_val_loss:
-        best_val_loss = val_loss
-        logger.info('best val_loss: {} best_epoch: {} '.format(best_val_loss,epoch))
-        torch.save(raw_model.state_dict(),'{}/best.pth'.format(save_dir))
-    #
-    return val_loss
+#@torch.no_grad()
+# def valid_epoch(epoch):
+#     global best_val_loss
+#     losses = []
+#     model.eval()
+#     for _, (X, Y) in enumerate(val_loader):
+#         X=X.to(device)
+#         Y=Y.to(device)
+#         with ctx:
+#             logits, loss = model(X, Y)
+#         losses.append(loss.item())
+#     model.train()
+#     val_loss=np.mean(losses)
+#     #
+#     logger.info('valid loss = {:.4f}'.format(val_loss))
+#     if val_loss < best_val_loss:
+#         best_val_loss = val_loss
+#         logger.info('best val_loss: {} best_epoch: {} '.format(best_val_loss,epoch))
+#         torch.save(raw_model.state_dict(),'{}/best.pth'.format(save_dir))
+#     #
+#     return val_loss
 
 def init_model():
     # model init
