@@ -110,16 +110,16 @@ LLM微调的目的是将预训练模型中的知识引导出来的一种手段�
 ## 🥇模型权重以及评测
 1. **预训练模型**
    
-   | 模型名称                   | 预训练语料                                                      | 🤗模型参数                                          | 下载地址                                                            |
-   |------------------------|------------------------------------------------------------|-------------------------------------------------|-----------------------------------------------------------------|
-   | Llama2-Chinese-92M-v1  | （82.78亿 Tokens）Wiki中文百科+BaiduBaiKe+shibing624/medical      | max_seq_len=512/dim=512/n_layers=8/n_heads=8    | [模型下载](https://pan.baidu.com/s/14hwHVvv_5YrIrJg2NWI62g)提取码：da7h |
-   | Llama2-Chinese-92M-v2  | （140亿 Tokens）Wiki中文百科+BaiduBaiKe+shibing624/medical+C4_zh  | max_seq_len=512/dim=512/n_layers=8/n_heads=8    | [模型下载](https://pan.baidu.com/s/1slimqUbDsnChqFY3CsybVw)提取码：bjal |
-   | Llama2-Chinese-218M-v1 | （140亿 Tokens）Wiki中文百科+BaiduBaiKe+shibing624/medical+C4_zh  | max_seq_len=1024/dim=1024/n_layers=12/n_heads=8 | [模型下载](https://pan.baidu.com/s/1cud_kEyRpXLR74DTRvqjGQ)提取码：dkne |
-   | Llama2-Chinese-218M-v2 | （634亿 Tokens）Wiki中文百科+BaiduBaiKe+shibing624/medical+C4_zh+WuDaoCorpora | max_seq_len=1024/dim=1024/n_layers=12/n_heads=8 | 正在加紧训练中！！                                                       |
+   | 模型名称                   | 预训练语料                                                      | 🤗模型参数                                                  | 下载地址                                                            |
+   |------------------------|------------------------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------------|
+   | Llama2-Chinese-92M-v1  | （82.78亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical      | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/14hwHVvv_5YrIrJg2NWI62g)提取码：da7h |
+   | Llama2-Chinese-92M-v2  | （140亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh  | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/1slimqUbDsnChqFY3CsybVw)提取码：bjal |
+   | Llama2-Chinese-218M-v1 | （140亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh  | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | [模型下载](https://pan.baidu.com/s/1cud_kEyRpXLR74DTRvqjGQ)提取码：dkne |
+   | Llama2-Chinese-218M-v2 | （634亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh<br/>+WuDaoCorpora | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | 正在加紧训练中！！                                                       |
 
    ### 各个预训练模型效果对比
    预训练loss可视化展示：
-   ![loss_tokens.png](model_ckpt%2Floss_tokens.png)
+   ![loss_tokens.png](loss_tokens.png)
    主要从**续写能力**的角度对比各个预训练模型：
    ```python
    #预训练模型的推理：eval_pretrain.py。
@@ -142,12 +142,12 @@ LLM微调的目的是将预训练模型中的知识引导出来的一种手段�
    
    | 模型名称                               | SFT语料                                                                      | 🤗模型参数                                          | 下载地址                                                     |
    |------------------------------------|----------------------------------------------------------------------------|-------------------------------------------------|----------------------------------------------------------|
-   | Llama2-Chinese-92M-v1-NormalChat   | alpaca-zh+bell                                                             | max_seq_len=512/dim=512/n_layers=8/n_heads=8    | [模型下载](https://pan.baidu.com/s/14hwHVvv_5YrIrJg2NWI62g)提取码：da7h|
-   | Llama2-Chinese-92M-v1-MedicalChat  | shibing624/medical+HuatuoGPT-sft-data-v1+DISC-Med-SFT+ChatMed_Consult-v0.3 | max_seq_len=512/dim=512/n_layers=8/n_heads=8    | [模型下载](https://pan.baidu.com/s/14hwHVvv_5YrIrJg2NWI62g)提取码：da7h|
-   | Llama2-Chinese-92M-v2-NormalChat   | alpaca-zh+bell                                                             | max_seq_len=512/dim=512/n_layers=8/n_heads=8    | [模型下载](https://pan.baidu.com/s/1slimqUbDsnChqFY3CsybVw)提取码：bjal |
-   | Llama2-Chinese-92M-v2-MedicalChat  | shibing624/medical+HuatuoGPT-sft-data-v1+DISC-Med-SFT+ChatMed_Consult-v0.3 | max_seq_len=512/dim=512/n_layers=8/n_heads=8    | 正在加紧训练中！！！                                               |
-   | Llama2-Chinese-218M-v1-NormalChat  | alpaca-zh+bell                                                             | max_seq_len=1024/dim=1024/n_layers=12/n_heads=8 | [模型下载](https://pan.baidu.com/s/1cud_kEyRpXLR74DTRvqjGQ)提取码：dkne |
-   | Llama2-Chinese-218M-v1-MedicalChat | shibing624/medical+HuatuoGPT-sft-data-v1+DISC-Med-SFT+ChatMed_Consult-v0.3 | max_seq_len=1024/dim=1024/n_layers=12/n_heads=8 | 正在加紧训练中！！！                                               |
+   | Llama2-Chinese-92M-v1-NormalChat   | alpaca-zh+bell                                                             | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/14hwHVvv_5YrIrJg2NWI62g)提取码：da7h|
+   | Llama2-Chinese-92M-v1-MedicalChat  | shibing624/medical<br/>+HuatuoGPT-sft-data-v1<br/>+DISC-Med-SFT<br/>+ChatMed_Consult-v0.3 | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/14hwHVvv_5YrIrJg2NWI62g)提取码：da7h|
+   | Llama2-Chinese-92M-v2-NormalChat   | alpaca-zh+bell                                                             | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/1slimqUbDsnChqFY3CsybVw)提取码：bjal |
+   | Llama2-Chinese-92M-v2-MedicalChat  | shibing624/medical<br/>+HuatuoGPT-sft-data-v1<br/>+DISC-Med-SFT<br/>+ChatMed_Consult-v0.3 | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | 正在加紧训练中！！！                                               |
+   | Llama2-Chinese-218M-v1-NormalChat  | alpaca-zh+bell                                                             | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | [模型下载](https://pan.baidu.com/s/1cud_kEyRpXLR74DTRvqjGQ)提取码：dkne |
+   | Llama2-Chinese-218M-v1-MedicalChat | shibing624/medical<br/>+HuatuoGPT-sft-data-v1<br/>+DISC-Med-SFT<br/>+ChatMed_Consult-v0.3 | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | 正在加紧训练中！！！                                               |
    
    目前没有在标准测试集上验证SFT模型效果。仅仅给出以下示例：
    ```python
