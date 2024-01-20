@@ -9,13 +9,13 @@ from model import ModelArgs, Transformer
 from chatglm_tokenizer.tokenization_chatglm import ChatGLMTokenizer
 import numpy as np
 
-def compute_bleu(labels, preds, weights=None):
-    from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
-    weights = weights or (0.25, 0.25, 0.25, 0.25)
-    return np.mean([sentence_bleu(references=[label],
-                                  hypothesis=pred,
-                                  smoothing_function=SmoothingFunction().method1,
-                                  weights=weights) for label, pred in zip(labels, preds)])
+# def compute_bleu(labels, preds, weights=None):
+#     from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
+#     weights = weights or (0.25, 0.25, 0.25, 0.25)
+#     return np.mean([sentence_bleu(references=[label],
+#                                   hypothesis=pred,
+#                                   smoothing_function=SmoothingFunction().method1,
+#                                   weights=weights) for label, pred in zip(labels, preds)])
 # -----------------------------------------------------------------------------
 out_dir = 'out' # ignored if init_from is not 'resume'
 start = "" # or "<|endoftext|>" or etc. Can also specify a file, use as: "FILE:prompt.txt"
@@ -95,7 +95,7 @@ target_lst=[]
 for p in data[:100]:
     # run generation
     prompt=p['question']
-    x=tokenizer.encode(prompt,add_special_tokens=False)#+[tokenizer.special_tokens['<bos>']]
+    x=tokenizer.encode(prompt,add_special_tokens=False)
     x = (torch.tensor(x, dtype=torch.long, device=device)[None, ...])
     target=p['response_rejected']
     target_lst.append(target)
