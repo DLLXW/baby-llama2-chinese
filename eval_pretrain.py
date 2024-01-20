@@ -85,9 +85,9 @@ tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
 #         data.append(json.loads(line))
 
 data = [
-    {"question": "床前明月光，疑是地上霜。举头望明月，", "response_rejected": ""},
-    {"question": "请你讲一个童话故事：", "response_rejected": ""},
-    {"question": "《小王子》是一本畅销童话书，它讲述了：", "response_rejected": ""},
+    {"question": "床前明月光，疑是地上霜。举头望明月，"},
+    {"question": "请你讲一个童话故事："},
+    {"question": "《小王子》是一本畅销童话书，它讲述了："},
 ]
 
 ans_lst=[]
@@ -110,8 +110,8 @@ for p in data[:100]:
             print('[answer]:',answer)
             print('---------------')
 #
-import jieba
-target_lst=[jieba.lcut(result.lower()) for result in target_lst]
-preds_lst=[jieba.lcut(result.lower()) for result in ans_lst]
-scores = compute_bleu(preds_lst, target_lst)
-print(scores)
+# import jieba
+# target_lst=[jieba.lcut(result.lower()) for result in target_lst]
+# preds_lst=[jieba.lcut(result.lower()) for result in ans_lst]
+# scores = compute_bleu(preds_lst, target_lst)
+# print(scores)
