@@ -14,6 +14,31 @@ Created by Limzero & Ambrose
 - 构建包含预训练、SFT指令微调、奖励模型以及强化学习整个完整流程的LLM代码仓库，包含DeepSpeed、Megatron等分布式训练技术
 - 知识分享：梳理一套完整的LLM学习资料
 
+## 🌟Quick Start
+```bash
+# 1. 从“Baby-llama2-chinese Corpus”的百度网盘中下载分词处理后的预训练语料。（按需求下载-共634亿tokens，文件总大小为118G）
+# 2. 将下载好的数据放到./data/目录下
+# 3. 根据下载的语料，修改data_process.py中的data_path_list部分
+# 4. 运行data_process.py，在./data/目录下生成pretrain_data.bin文件
+python data_process.py
+# 5. 根据自身算力，修改 pretrain.py文件中的模型参数调整模型大小（max_seq_len、dim、n_layers、n_heads），如果爆显存可以调整batch_size参数
+# 6. 预训练 pretrain.py——以下示例是基于4*3090
+screen -S ambrose    #(创建新的名称为ambrose的screen)
+screen -r ambrose    #(进入名称为ambrose的screen)
+torchrun --standalone --nproc_per_node=4 pretrain.py
+# 7. 运行结束后，预训练模型会保存在out/pretrain文件夹中
+# 8. 针对alpaca-zh和bell两个SFT语料进行处理，如果新加SFT语料可以自行扩展。运行sft_data_process.py
+python sft_data_process.py
+# 9. 运行结束后，会在./sft_data目录下产生sft_data.csv文件
+# 10. SFT微调
+python sft.py
+# 11. 运行结束后，SFT模型会保存在‘out/sft’文件夹中
+
+# 12. 如果需要测试训练好的SFT模型，可以运行eval.py。（可以自定义问题）
+python eval.py
+```
+
+
 ## 🤖预训练
 一个好的预训练基座模型要具备**续写**的能力。
 1. **分词器（Tokenizer）**：LLM分词器的构建方式有两种：一种是自己构造词表并训练一个分词器[custom tokenizers](https://github.com/karpathy/llama2.c)，另一种是选择开源模型训练好的分词器，例如ChatGLM2-6B，Llama2等。
@@ -30,7 +55,7 @@ Created by Limzero & Ambrose
    | WuDaoCorpora：[智源研究院BAAI：WuDaoCorpora Text文本预训练数据集](https://data.baai.ac.cn/details/WuDaoCorporaText)                                                                                                                       | 中文悟道开源的200G数据                                                 |
    | shibing624/medical：[shibing624/medical](https://huggingface.co/datasets/shibing624/medical/tree/main)                                                                                                          | 源自shibing624的一部分医学领域的预训练数据                                    |
 
-同时，为了给大家节省数据预处理的时间，本项目开源了经过ChatGLM2-6B的分词器处理后的预训练语料，共计**634亿Tokens**的数据量，链接如下：[Baby-llama2-chinese Corpus](https://pan.baidu.com/s/18o4gF-G68qfgOGWQXgAg3g)。将下载好的数据放到./data目录下即可。
+同时，为了给大家节省数据预处理的时间，本项目开源了经过ChatGLM2-6B的分词器处理后的预训练语料，共计**634亿Tokens**的数据量，链接如下：[Baby-llama2-chinese Corpus](https://pan.baidu.com/s/18o4gF-G68qfgOGWQXgAg3g) 提取码：6unr。将下载好的数据放到./data目录下即可。
 
 【考虑到作者所持有机子的局限性（4张3090），目前634亿Tokens的预训练语料+300M参数量的模型已经是本人预训练的极限-注：没有使用DeepSpeed、Megatron等分布式训练架构】
 
@@ -104,7 +129,7 @@ screen -S ambrose    #(创建新的名称为ambrose的screen)
 screen -r ambrose    #(进入名称为ambrose的screen)
 #在该screen下执行微调代码
 python sft.py
-#运行结束后，预训练模型会保存在‘out/sft’文件夹中
+#运行结束后，SFT模型会保存在‘out/sft’文件夹中
 ```
 
 ## 🥇模型权重以及评测
