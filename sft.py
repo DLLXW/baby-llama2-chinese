@@ -175,8 +175,8 @@ if __name__=="__main__":
     batch_size = 32 # if gradient_accumulation_steps > 1, this is the micro-batch size
     # model
     max_seq_len = 512
-    dim = 1024
-    n_layers = 12
+    dim = 512
+    n_layers = 8
     n_heads = 8
     multiple_of = 32
     dropout = 0.0 # for pretraining 0 is good, for finetuning try 0.1+
@@ -208,7 +208,7 @@ if __name__=="__main__":
     # config = {k: globals()[k] for k in config_keys}  # will be useful for logging
     # -----------------------------------------------------------------------------
 
-    save_dir =os.path.join(out_dir , 'sft_bell')
+    save_dir =os.path.join(out_dir , 'sft')
     if not os.path.exists(save_dir): os.makedirs(save_dir)
     logger = get_logger(os.path.join(save_dir,'log.log'))
     # various inits, derived attributes, I/O setup
@@ -254,7 +254,7 @@ if __name__=="__main__":
     best_val_loss = 1e9
     
     #-----init dataloader------
-    df=pd.read_csv('./data/sft_data.csv')
+    df=pd.read_csv('./sft_data/sft_data.csv')
     # input=[]
     # target=[]
     # with open('../track1/train_valid.json','r') as f:
