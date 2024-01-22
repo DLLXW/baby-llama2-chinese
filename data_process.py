@@ -220,6 +220,7 @@ def process_wudao():
 
 if __name__=="__main__":
     tokenizer = ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
+    # 数据预处理-如果下载分词处理后的数据，可以不用执行以下函数
     # process_wiki_clean()
     # process_medical('./data/shibing624_medical/pretrain/medical_book_zh.json','book')
     # process_medical('./data/shibing624_medical/pretrain/train_encyclopedia.json','encyclopedia')
@@ -229,7 +230,7 @@ if __name__=="__main__":
 
     # print('data processing finished!')
 
-
+    # 分词处理后的文件列表
     data_path_list=[
         './data/baidubaike_563w_1.bin',
         './data/baidubaike_563w_2.bin',
