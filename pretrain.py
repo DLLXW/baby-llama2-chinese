@@ -171,7 +171,7 @@ def init_model():
 # I/O
 if __name__=="__main__":
     out_dir = 'out'
-    max_epoch = 2
+    max_epoch = 1
     eval_interval = 1
     log_interval = 100
     save_interval = 10000
