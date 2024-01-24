@@ -38,6 +38,8 @@ python sft.py
 python eval.py
 ```
 
+## 📢 更新公告
+- 2024年01月24日：新增了在84亿tokens预训练语料上的两个新模型Llama2-Chinese-92M-v1-smallvocab与Llama2-Chinese-218M-v1，与Llama2-Chinese-92M-v1进行对比分析模型大小和词表大小对预训练效果的影响！
 
 ## 🤖预训练
 一个好的预训练基座模型要具备**续写**的能力。
@@ -135,15 +137,25 @@ python sft.py
 ## 🥇模型权重以及评测
 1. **预训练模型**
    
-   | 模型名称                   | 预训练语料                                                      | 🤗模型参数                                                  | 下载地址                                                            |
-   |------------------------|------------------------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------------|
-   | Llama2-Chinese-92M-v1  | （82.78亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical      | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/14hwHVvv_5YrIrJg2NWI62g)提取码：da7h |
-   | Llama2-Chinese-92M-v2  | （140亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh  | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/1slimqUbDsnChqFY3CsybVw)提取码：bjal |
-   | Llama2-Chinese-218M-v1 | （140亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh  | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | [模型下载](https://pan.baidu.com/s/1cud_kEyRpXLR74DTRvqjGQ)提取码：dkne |
-   | Llama2-Chinese-218M-v2 | （634亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh<br/>+WuDaoCorpora | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | 正在加紧训练中！！                                                       |
+   | 模型名称                                                        | 预训练语料                                                      | 🤗模型参数                                                  | 下载地址                                                            |
+   |-------------------------------------------------------------|------------------------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------------|
+   | Llama2-Chinese-92M-v1                                       | （82.78亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical     | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/14hwHVvv_5YrIrJg2NWI62g)提取码：da7h |
+   | Llama2-Chinese-92M-v2                                       | （140亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/1slimqUbDsnChqFY3CsybVw)提取码：bjal |
+   | Llama2-Chinese-92M-v1-smallvocab<br/>**Notes:vocab size:21131** | （82.78亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical     | max_seq_len=512<br/>dim=512<br/>n_layers=8<br/>n_heads=8    | [模型下载](https://pan.baidu.com/s/1bKtAo8MBlDur6JIDW5cSYg)提取码：ttst |
+   | Llama2-Chinese-218M-v1                                      |（82.78亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical     | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | [模型下载](https://pan.baidu.com/s/1wLVGFbT4OF4LG2E8Ymf6VA)提取码：c10m |
+   | Llama2-Chinese-218M-v2                                      | （140亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | [模型下载](https://pan.baidu.com/s/1cud_kEyRpXLR74DTRvqjGQ)提取码：dkne | 
+   | Llama2-Chinese-218M-v3                                      | （634亿 Tokens）<br/>Wiki中文百科<br/>+BaiduBaiKe<br/>+shibing624/medical<br/>+C4_zh<br/>+WuDaoCorpora | max_seq_len=1024<br/>dim=1024<br/>n_layers=12<br/>n_heads=8 | 正在加紧训练中！！                                                       |
 
 ### 各个预训练模型效果对比
 预训练loss可视化展示：
+
+预训练语料v1：（82.78亿 Tokens） Wiki中文百科 + BaiduBaiKe + shibing624/medical
+
+对比模型说明：**Llama2-Chinese-92M-v1** vs **Llama2-Chinese-92M-v1-smallvocab** vs **Llama2-Chinese-218M-v1**
+![loss_tokens-v1.png](loss_tokens-v1.png)
+预训练语料v2：（140亿 Tokens） Wiki中文百科 + BaiduBaiKe + shibing624/medical + C4_zh
+
+对比模型说明：**Llama2-Chinese-92M-v2** vs **Llama2-Chinese-218M-v2**
 ![loss_tokens.png](loss_tokens.png)
 主要从**续写能力**的角度对比各个预训练模型：
 ```bash
