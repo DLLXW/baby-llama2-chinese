@@ -97,8 +97,6 @@ for p in data[:100]:
     prompt=p['question']
     x=tokenizer.encode(prompt,add_special_tokens=False)
     x = (torch.tensor(x, dtype=torch.long, device=device)[None, ...])
-    target=p['response_rejected']
-    target_lst.append(target)
     with torch.no_grad():
         with ctx:
             y = model.generate(x, 2, max_new_tokens, temperature=temperature, top_k=top_k)
