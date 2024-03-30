@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 from chatglm_tokenizer.tokenization_chatglm import ChatGLMTokenizer
 import pandas as pd
+import os
 
 
 # from zhconv import convert
@@ -245,9 +246,9 @@ if __name__ == "__main__":
     # process_wiki_clean()
     # process_medical('./data/shibing624_medical/pretrain/medical_book_zh.json','book')
     # process_medical('./data/shibing624_medical/pretrain/train_encyclopedia.json','encyclopedia')
-    process_baidu()
-    process_c4()
-    max_idx = process_wudao(slice_size=10)
+    # process_baidu()
+    # process_c4()
+    # max_idx = process_wudao(slice_size=10)
 
     # print('data processing finished!')
 
@@ -270,31 +271,36 @@ if __name__ == "__main__":
         './data/c4_zh_6.bin',
         './data/c4_zh_7.bin',
         './data/c4_zh_8.bin',
-        # './data/wudaocorpus_zh_0.bin',
-        # './data/wudaocorpus_zh_1.bin',
-        # './data/wudaocorpus_zh_2.bin',
-        # './data/wudaocorpus_zh_3.bin',
-        # './data/wudaocorpus_zh_4.bin',
-        # './data/wudaocorpus_zh_5.bin',
-        # './data/wudaocorpus_zh_6.bin',
-        # './data/wudaocorpus_zh_7.bin',
-        # './data/wudaocorpus_zh_8.bin',
-        # './data/wudaocorpus_zh_9.bin',
-        # './data/wudaocorpus_zh_10.bin',
-        # './data/wudaocorpus_zh_11.bin',
-        # './data/wudaocorpus_zh_12.bin',
-        # './data/wudaocorpus_zh_13.bin',
-        # './data/wudaocorpus_zh_14.bin',
-        # './data/wudaocorpus_zh_15.bin',
-        # './data/wudaocorpus_zh_16.bin',
-    ].extend([f'./data/wudaocorpus_zh_{i}.bin' for i in range(max_idx)])
+        './data/wudaocorpus_zh_0.bin',
+        './data/wudaocorpus_zh_1.bin',
+        './data/wudaocorpus_zh_2.bin',
+        './data/wudaocorpus_zh_3.bin',
+        './data/wudaocorpus_zh_4.bin',
+        './data/wudaocorpus_zh_5.bin',
+        './data/wudaocorpus_zh_6.bin',
+        './data/wudaocorpus_zh_7.bin',
+        './data/wudaocorpus_zh_8.bin',
+        './data/wudaocorpus_zh_9.bin',
+        './data/wudaocorpus_zh_10.bin',
+        './data/wudaocorpus_zh_11.bin',
+        './data/wudaocorpus_zh_12.bin',
+        './data/wudaocorpus_zh_13.bin',
+        './data/wudaocorpus_zh_14.bin',
+        './data/wudaocorpus_zh_15.bin',
+        './data/wudaocorpus_zh_16.bin',
+    ] \
+        # .extend([f'./data/wudaocorpus_zh_{i}.bin' for i in range(max_idx)])
 
-    data_lst = []
+    if os.path.exists('./data/pretrain_data.bin'):
+        print("Warning: The pretrain data is existed, "
+              "your operation will be added at the end of the file.")
+
     for data_path in tqdm(data_path_list):
+        data_lst = []
         with open(data_path, 'rb') as f:
             data = np.fromfile(f, dtype=np.uint16)
             data_lst.append(data)
-    arr = np.concatenate(data_lst)
-    print(arr.shape)
-    with open('./data/pretrain_data.bin', 'wb') as f:
-        f.write(arr.tobytes())
+        arr = np.concatenate(data_lst)
+        # print(arr.shape)
+        with open('./data/pretrain_data.bin', 'ab') as f:
+            f.write(arr.tobytes())
