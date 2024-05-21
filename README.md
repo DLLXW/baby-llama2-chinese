@@ -59,9 +59,9 @@ python eval.py
    | WuDaoCorpora：[智源研究院BAAI：WuDaoCorpora Text文本预训练数据集](https://data.baai.ac.cn/details/WuDaoCorporaText)                                                                                                                       | 中文悟道开源的200G数据                                                 |
    | shibing624/medical：[shibing624/medical](https://huggingface.co/datasets/shibing624/medical/tree/main)                                                                                                          | 源自shibing624的一部分医学领域的预训练数据                                    |
 
-同时，为了给大家节省数据预处理的时间，本项目开源了经过ChatGLM2-6B的分词器处理后的预训练语料，共计**634亿Tokens**的数据量，链接如下：[Baby-llama2-chinese Corpus](https://pan.baidu.com/s/18o4gF-G68qfgOGWQXgAg3g) 提取码：6unr。将下载好的数据放到./data目录下即可。
-
-【考虑到作者所持有机子的局限性（4张3090），目前634亿Tokens的预训练语料+300M参数量的模型已经是本人预训练的极限-注：没有使用DeepSpeed、Megatron等分布式训练架构】
+   同时，为了给大家节省数据预处理的时间，本项目开源了经过ChatGLM2-6B的分词器处理后的预训练语料，共计**634亿Tokens**的数据量，链接如下：[Baby-llama2-chinese Corpus](https://pan.baidu.com/s/18o4gF-G68qfgOGWQXgAg3g) 提取码：6unr。将下载好的数据放到./data目录下即可。
+   
+   【考虑到作者所持有机子的局限性（4张3090），目前634亿Tokens的预训练语料+300M参数量的模型已经是本人预训练的极限-注：没有使用DeepSpeed、Megatron等分布式训练架构】
 
 ### 预训练语料预处理
 1. **数据清洗**：大规模的高质量语料是训练大语言模型的关键“养料”。这些语料提供了世界性的知识体系，能够提升语言模型的理解能力和生成质量，同时也能够支持多样化的应用场景。事实上，高质量的文本对于大语言模型的训练和能力表现具有非常重要的影响。
@@ -179,15 +179,15 @@ LLM微调的目的是将预训练模型中的知识引导出来的一种手段�
    预训练语料v1：（82.78亿 Tokens） Wiki中文百科 + BaiduBaiKe + shibing624/medical
    
    对比模型说明：**Llama2-Chinese-92M-v1** vs **Llama2-Chinese-92M-v1-smallvocab** vs **Llama2-Chinese-218M-v1**
-   ![loss_tokens-v1.png](loss_tokens-v1.png)
+   ![loss_tokens-v1.png](images/loss_tokens-v1.png)
    预训练语料v2：（140亿 Tokens） Wiki中文百科 + BaiduBaiKe + shibing624/medical + C4_zh
    
    对比模型说明：**Llama2-Chinese-92M-v2** vs **Llama2-Chinese-218M-v2**
-   ![loss_tokens.png](loss_tokens.png)
+   ![loss_tokens.png](images/loss_tokens.png)
    预训练语料v3：（634亿 Tokens） Wiki中文百科 + BaiduBaiKe + shibing624/medical + C4_zh + WuDaoCorpora
    
    对比模型说明：**Llama2-Chinese-218M-v3**
-   ![loss_tokens-v3.png](loss_tokens-v3.png)
+   ![loss_tokens-v3.png](images/loss_tokens-v3.png)
    主要从**续写能力**的角度对比各个预训练模型：
    ```bash
    #预训练模型的推理：eval_pretrain.py。
