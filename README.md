@@ -1,5 +1,5 @@
 # Baby-Llama2-Chinese
-Created by Limzero & Ambrose
+Created by Limzero & Ambrose & Guolin
 ## 📝介绍
 本项目致力于构建一个小参数量的中文Llama2仓库。
 
@@ -41,6 +41,7 @@ python eval.py
 ## 📢 更新公告
 - 2024年01月24日：新增了在84亿tokens预训练语料上的两个新模型Llama2-Chinese-92M-v1-smallvocab与Llama2-Chinese-218M-v1，与Llama2-Chinese-92M-v1进行对比分析模型大小和词表大小对预训练效果的影响！
 - 2024年02月29日：新增了在634亿tokens预训练语料上的模型Llama2-Chinese-218M-v3，并以此为基座，使用医学垂直领域SFT数据进行finetune得到模型Llama2-Chinese-218M-v3-MedicalChat
+- 2024年05月21日：新增了数据清洗代码，包括：短文本过滤、Minhash（和Simhash）去重、数据存储格式转换、多数据集合并等功能。代码见clean_data目录，以budubaike数据为例，进行了数据清洗，清洗效果见下文《预训练语料预处理》部分。
 
 ## 🤖预训练
 一个好的预训练基座模型要具备**续写**的能力。
@@ -63,7 +64,31 @@ python eval.py
 【考虑到作者所持有机子的局限性（4张3090），目前634亿Tokens的预训练语料+300M参数量的模型已经是本人预训练的极限-注：没有使用DeepSpeed、Megatron等分布式训练架构】
 
 ### 预训练语料预处理
-数据预处理采取GPT的通用做法，对语料进行提前分词，对一个样本做完分词后在末尾加上一个结束符号`<eos>`，与下一个样本区分开。然后将所有的训练语料拼接成一个数组（np.uint16）以.bin二进制格式存储到磁盘上。如果语料过大，避免内存溢出，可以选择mmap格式。
+1. **数据清洗**：大规模的高质量语料是训练大语言模型的关键“养料”。这些语料提供了世界性的知识体系，能够提升语言模型的理解能力和生成质量，同时也能够支持多样化的应用场景。事实上，高质量的文本对于大语言模型的训练和能力表现具有非常重要的影响。
+   
+   ### 低质量文本过滤
+   **待补充......**
+   
+   ### 文本去重
+   ```bash
+   #脚本里面将短文本过滤、Minhash（和Simhash）去重、数据存储格式转换、多数据集合并等功能封装成对应函数，可以根据需求选择调用函数。注意：需要根据本地数据路径修改函数中的数据路径
+   cd data_clean
+   python clear.py
+   #以budubaike数据为例，运行结束后，会产生baike.parquet和all_no_dulpticates.parquet（all_no_dulpticates_simhash.parquet）文件
+   ```
+   数据清洗实验结果说明：(测试设备为 CPU：Intel(R) Xeon(R) Platinum 8168 CPU @ 2.70GHz)
+   
+   （去重前budubaike数据总共：5634898行）
+
+   | 函数名称                                    | 函数功能           | 去重效果            | Time Consuming |
+   |-----------------------------------------|----------------|--------------------|----------------|
+   | process_baike()                         | 短文本过滤+数据存储个数转换 | 5634898 to 3605212 | 552.046 s      |
+   | remove_dataset_duplicate_rows()         | Minhash去重      | 3605212 to 2736033 | 4 h            |
+   | remove_dataset_duplicate_rows_simhash() | Simhash去重      | 3605212 to 3548779 | 23 min         |
+
+   推荐使用Minhash！
+
+2. **分词器处理数据**：数据预处理采取GPT的通用做法，对语料进行提前分词，对一个样本做完分词后在末尾加上一个结束符号`<eos>`，与下一个样本区分开。然后将所有的训练语料拼接成一个数组（np.uint16）以.bin二进制格式存储到磁盘上。如果语料过大，避免内存溢出，可以选择mmap格式。
 ```bash
 #脚本里面每一个函数对应一个语料库的预处理，搭建新加语料可以自行扩展。
 python data_process.py
@@ -236,8 +261,8 @@ Llama2-Chinese-92M-v2-MedicalChat response：‘’
 Llama2-Chinese-218M-v1-NormalChat response：‘’
 Llama2-Chinese-218M-v1-MedicalChat response：‘’
 Llama2-Chinese-218M-v2-NormalChat response：‘世界上最大的动物是蓝鲸。它们的体重可以达到4000至5000公斤，体重可达到7000至9000公斤。他们来自海洋，并且是地球上最适应 蓝鲸是一种非常适应生存由海洋环境而产生的哺乳动物。它们可以达到1.2至1.4米重。它们以鱼类为食，但也会吃小鱼。蓝鲸是肉食性的动物，但它们也可以吃小型’
-Llama2-Chinese-218M-v3-MedicalChat response：‘除了导致的，在一般情况下，保持适当的中毒处理方法是首先通过服用药物。’
 Llama2-Chinese-218M-v2-MedicalChat response：‘’
+Llama2-Chinese-218M-v3-MedicalChat response：‘除了导致的，在一般情况下，保持适当的中毒处理方法是首先通过服用药物。’
 Llama2-Chinese-218M-v3-NormalChat response：‘’
 ```
 
@@ -248,4 +273,7 @@ Llama2-Chinese-218M-v3-NormalChat response：‘’
 ## 🎉号召
 欢迎大家一起共建这个小项目，这对于希望入门LLM的同学来说，是一次不可多得的练手机会！感兴趣的小伙伴可以加QQ群: 716455397。 
 
-[参考llama2.c](https://github.com/karpathy/llama2.c)
+## 🎉参考链接
+[Llama2](https://github.com/karpathy/llama2.c)
+
+[数据清洗-ChatLM-mini-Chinese](https://github.com/charent/ChatLM-mini-Chinese/)
