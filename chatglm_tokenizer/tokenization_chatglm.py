@@ -66,11 +66,11 @@ class ChatGLMTokenizer(PreTrainedTokenizer):
     model_input_names = ["input_ids", "attention_mask", "position_ids"]
 
     def __init__(self, vocab_file, padding_side="left", clean_up_tokenization_spaces=False, **kwargs):
+        self.tokenizer = SPTokenizer(vocab_file)
         super().__init__(padding_side=padding_side, clean_up_tokenization_spaces=clean_up_tokenization_spaces, **kwargs)
         self.name = "GLMTokenizer"
 
         self.vocab_file = vocab_file
-        self.tokenizer = SPTokenizer(vocab_file)
         self.special_tokens = {
             "<bos>": self.tokenizer.bos_id,
             "<eos>": self.tokenizer.eos_id,
