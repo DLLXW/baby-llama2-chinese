@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 from chatglm_tokenizer.tokenization_chatglm import ChatGLMTokenizer
 import pandas as pd
+from multiprocessing import Pool
 #from zhconv import convert
 def process_wiki_clean():
     with open('./data/wikipedia_cn_20230720/wikipedia-cn-20230720-filtered.json','r',encoding='utf-8') as f:
@@ -185,7 +186,49 @@ def process_c4():
     with open('./data/c4_zh.bin','wb') as f:
         f.write(arr.tobytes())
     print(arr.shape)
+    
+def process_file(file_path, tokenizer):
+    try:
+        doc_ids = []
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+            for text in data:
+                text = text['title'] + text['content']
+                text_id = tokenizer.encode(text, add_special_tokens=False)
+                text_id.append(tokenizer.special_tokens['<eos>'])
+                if len(text_id) > 5:
+                    doc_ids += text_id
+        return doc_ids  # 返回每个文件的处理结果
+    except Exception as e:
+        print(str(e))
+        return []
+    
+def process_wudao():
+    wudao_zh_paths = glob.glob('./data/WuDaoCorpus2.0_base_200G/*')
+    wudao_zh_paths=sorted(wudao_zh_paths)
+    print(len(wudao_zh_paths))#很多子文件
 
+    slice_size = 4  #进程数（结合内存以及CPU核数修改）
+    num_files = len(wudao_zh_paths)
+    
+    with Pool() as pool:
+        for i in tqdm(range(0, num_files, slice_size)):
+            slice_end = min(i + slice_size, num_files)
+            doc_ids_list = pool.starmap(process_file, [(per, tokenizer) for per in wudao_zh_paths[i:slice_end]])
+
+            all_doc_ids = []
+            for doc_ids in doc_ids_list:
+                all_doc_ids += doc_ids
+                
+            if len(doc_ids) > 0:
+                # 保存当前切片
+                arr = np.array(doc_ids, dtype=np.uint16)
+                file_index = i // slice_size  # 计算文件编号
+                with open(f'./data/wudaocorpus_zh_{file_index}.bin', 'wb') as f:
+                    f.write(arr.tobytes())
+                
+                del arr
+'''
 def process_wudao():
     wudao_zh_paths = glob.glob('./data/WuDaoCorpus2.0_base_200G/*')
     wudao_zh_paths=sorted(wudao_zh_paths)
@@ -217,7 +260,7 @@ def process_wudao():
     with open('./data/wudaocorpus_zh_16.bin','wb') as f:
         f.write(arr.tobytes())
     print(arr.shape)
-
+'''
 if __name__=="__main__":
     tokenizer = ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
     # 数据预处理-如果下载分词处理后的数据，可以不用执行以下函数
@@ -249,24 +292,28 @@ if __name__=="__main__":
         './data/c4_zh_6.bin',
         './data/c4_zh_7.bin',
         './data/c4_zh_8.bin',
-        './data/wudaocorpus_zh_0.bin',
-        './data/wudaocorpus_zh_1.bin',
-        './data/wudaocorpus_zh_2.bin',
-        './data/wudaocorpus_zh_3.bin',
-        './data/wudaocorpus_zh_4.bin',
-        './data/wudaocorpus_zh_5.bin',
-        './data/wudaocorpus_zh_6.bin',
-        './data/wudaocorpus_zh_7.bin',
-        './data/wudaocorpus_zh_8.bin',
-        './data/wudaocorpus_zh_9.bin',
-        './data/wudaocorpus_zh_10.bin',
-        './data/wudaocorpus_zh_11.bin',
-        './data/wudaocorpus_zh_12.bin',
-        './data/wudaocorpus_zh_13.bin',
-        './data/wudaocorpus_zh_14.bin',
-        './data/wudaocorpus_zh_15.bin',
-        './data/wudaocorpus_zh_16.bin',
+        #'./data/wudaocorpus_zh_0.bin',
+        #'./data/wudaocorpus_zh_1.bin',
+        #'./data/wudaocorpus_zh_2.bin',
+        #'./data/wudaocorpus_zh_3.bin',
+        #'./data/wudaocorpus_zh_4.bin',
+        #'./data/wudaocorpus_zh_5.bin',
+        #'./data/wudaocorpus_zh_6.bin',
+        #'./data/wudaocorpus_zh_7.bin',
+        #'./data/wudaocorpus_zh_8.bin',
+        #'./data/wudaocorpus_zh_9.bin',
+        #'./data/wudaocorpus_zh_10.bin',
+        #'./data/wudaocorpus_zh_11.bin',
+        #'./data/wudaocorpus_zh_12.bin',
+        #'./data/wudaocorpus_zh_13.bin',
+        #'./data/wudaocorpus_zh_14.bin',
+        #'./data/wudaocorpus_zh_15.bin',
+        #'./data/wudaocorpus_zh_16.bin',
     ]
+    
+    wudao_data_path_list = sorted(glob.glob('./data/wudaocorpus_zh_*.bin'))
+    data_path_list.extend(wudao_data_path_list)
+    
     data_lst=[]
     for data_path in tqdm(data_path_list):
         with open(data_path,'rb') as f:
