@@ -171,6 +171,7 @@ def process_c4():
     token=0
     doc_ids=[]
     for per in tqdm(c4_zh_paths):
+        file_name=per.split('/')[-1]
         with open(per,'r') as f:
             for line in f:
                 text = json.loads(line)
@@ -181,11 +182,13 @@ def process_c4():
                     doc_ids+=text_id
                 cnt+=1
 
-    arr = np.array(doc_ids,dtype=np.uint16)
-    with open('./data/c4_zh.bin','wb') as f:
-        f.write(arr.tobytes())
-    print(arr.shape)
-
+        arr = np.array(doc_ids,dtype=np.uint16)
+        with open('./data/c4_zh.bin'.format(file_name),'wb') as f:
+            f.write(arr.tobytes())
+            f.flush()
+        doc_ids=[]
+        print(arr.shape)
+        
 def process_wudao():
     wudao_zh_paths = glob.glob('./data/WuDaoCorpus2.0_base_200G/*')
     wudao_zh_paths=sorted(wudao_zh_paths)
